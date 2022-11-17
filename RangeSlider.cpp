@@ -36,7 +36,6 @@ void RangeSlider::paintEvent(QPaintEvent* aEvent)
     QRectF backgroundRect = QRectF(scLeftRightMargin, (height() - scSliderBarHeight) / 2, width() - scLeftRightMargin * 2, scSliderBarHeight);
     QPen pen(Qt::gray, 0.8);
     painter.setPen(pen);
-    painter.setRenderHint(QPainter::Qt4CompatiblePainting);
     QBrush backgroundBrush(QColor(0xD0, 0xD0, 0xD0));
     painter.setBrush(backgroundBrush);
     painter.drawRoundedRect(backgroundRect, 1, 1);
@@ -197,7 +196,7 @@ QSize RangeSlider::minimumSizeHint() const
     return QSize(scHandleSideLength * 2 + scLeftRightMargin * 2, scHandleSideLength);
 }
 
-int RangeSlider::GetMinimun() const
+int RangeSlider::GetMinimum() const
 {
     return mMinimum;
 }
@@ -207,7 +206,7 @@ void RangeSlider::SetMinimum(int aMinimum)
     setMinimum(aMinimum);
 }
 
-int RangeSlider::GetMaximun() const
+int RangeSlider::GetMaximum() const
 {
     return mMaximum;
 }
@@ -320,8 +319,24 @@ int RangeSlider::validWidth() const
     return width() - scLeftRightMargin * 2 - scHandleSideLength * 2;
 }
 
-void RangeSlider::SetRange(int aMinimum, int mMaximum)
+void RangeSlider::SetRange(int aMinimum, int aMaximum)
 {
-    setMinimum(aMinimum);
-    setMaximum(mMaximum);
+    if ((aMaximum - aMinimum) > 0)
+    {
+        mMaximum = aMaximum;
+        mMinimum = aMinimum;
+    }
+    else
+    {
+        mMaximum = std::max(aMaximum,aMinimum);
+        mMinimum = std::min(aMaximum,aMinimum);
+    }
+
+    mInterval = mMaximum - mMinimum;
+
+    setLowerValue(mMinimum);
+    setUpperValue(mMaximum);
+    update();
+
+    emit rangeChanged(mMinimum, mMaximum);
 }
